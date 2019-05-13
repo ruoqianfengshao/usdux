@@ -10,6 +10,7 @@ fast build SPA application with MPA store
 - ✅ Build-in error-boundary and allow customize
 - ✅ Build-in routerError page and allow customize
 - [todo] Build-in auth page logic
+- [todo] Build-in key title description with router
 - [todo] support React suspence and lazy import
 - [todo] support ssr
 
@@ -19,7 +20,7 @@ fast build SPA application with MPA store
 npm i usdux -S
 ```
 
-write following code in `index.js`
+write following code in `index.js` which starts application
 
 ```js
 import App from 'usdux'
@@ -30,7 +31,7 @@ App({
     staticRouters: [{
       prefix: '/center',
       layout: (props) => <div {...props}/>,
-      title: 'hhh',
+      title: 'example 1',
       routers: [{
         title: 'asd',
         component: 'home',
@@ -46,4 +47,42 @@ App({
     logger
   ]
 })
+```
+
+
+``` js
+// Class Component
+
+import React from 'react'
+import { connect } from 'usdux'
+
+export default @connect class Component extends React.Component {
+  handleClick = () => {
+    this.props.dispatch({type: 'setGlobal', payload: {a: 1}})
+  }
+
+  render() {
+    return (<div>
+      <div onClick={this.handleClick}>{JSON.stringify(this.props._global_)}</div>
+      <div>{JSON.stringify(this.props._page_)}</div>
+    </div>)
+  }
+}
+
+
+// Functional Component
+import React from 'react'
+import { useStore } from 'usdux'
+
+export default const Component = () => {
+  const [store, dispatch] = useStore()
+  const handleClick = () => {
+    dispatch({type: 'setPage', payload: {a: 1}})
+  }
+
+  return (<div>
+      <div>{JSON.stringify(store._global_)}</div>
+      <div onClick={handleClick}>{JSON.stringify(store._page_)}</div>
+    </div>)
+}
 ```
