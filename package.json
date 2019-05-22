@@ -2,18 +2,37 @@
   "name": "usdux",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "npx babel src --out-dir dist"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/ruoqianfengshao/usdux.git"
   },
-  "author": "Vico",
+  "author": "vicowang",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ruoqianfengshao/usdux/issues"
   },
-  "homepage": "https://github.com/ruoqianfengshao/usdux#readme"
+  "homepage": "https://github.com/ruoqianfengshao/usdux#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-stage-0": "^7.0.0"
+  },
+  "dependencies": {
+    "@loadable/component": "^5.10.1",
+    "react": "^16.8.6",
+    "react-router-dom": "^5.0.0"
+  }
 }

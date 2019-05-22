@@ -1,6 +1,6 @@
 # usdux
 
-fast build SPA application with MPA store
+fast build SPA application with MPA store, no redux but compat middlewares, the global store apply with React.createContext
 
 - ✅ Build-in page and global store
 - ✅ Hocs and hooks to access store
@@ -16,7 +16,7 @@ fast build SPA application with MPA store
 
 ## Use
 
-```
+``` shell
 npm i usdux -S
 ```
 
@@ -49,10 +49,9 @@ App({
 })
 ```
 
+### Class Component
 
 ``` js
-// Class Component
-
 import React from 'react'
 import { connect } from 'usdux'
 
@@ -68,9 +67,12 @@ export default @connect class Component extends React.Component {
     </div>)
   }
 }
+```
 
+### Functional Component
 
-// Functional Component
+```js
+
 import React from 'react'
 import { useStore } from 'usdux'
 
@@ -86,3 +88,10 @@ export default const Component = () => {
     </div>)
 }
 ```
+
+### Default Action
+
+* `setGlobal`
+* `resetGlobal`
+* `setPage`
+* `resetPage`
