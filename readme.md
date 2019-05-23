@@ -14,11 +14,29 @@ fast build SPA application with MPA store, no redux but compat middlewares, the 
 - [todo] support React suspence and lazy import
 - [todo] support ssr
 
-## Use
+## Install
 
 ```shell
 npm i usdux -S
 ```
+
+## Usage
+
+### build
+
+usdux depends environment **process.env.usduxDir**, you should config with `webpack definePlugin`
+
+```js
+new webpack.DefinePlugin({
+  usduxDir: {
+    component: JSON.stringify('path/to/component'),
+    layout: JSON.stringify('path/to/layout'),
+    execption: JSON.stringify('path/to/execption'),
+  }
+}),
+```
+
+### start
 
 write following code in `index.js` which starts application
 

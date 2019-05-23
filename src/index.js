@@ -7,12 +7,14 @@ import store from './store'
 const defaultOptions = {
   routerConfig: {
 
-  }
+  },
 }
+
+export { useStore, connect, PageProvider } from './store'
 
 export default (options = {}) => {
   const opts = { ...defaultOptions, ...options }
-  const { layout, Router = router, root = document.getElementById('root')} = opts
+  const { Router = router, root = document.getElementById('root') } = opts
 
   // plugin config, once execute at start
   plugin.usePlugin(opts.plugins)
@@ -29,6 +31,5 @@ export default (options = {}) => {
   // ssr config
 
   // router config, and render page after error, 404, 403, 401 validate
-  ReactDOM.render(<Router routerConfig={opts.routerConfig} />, root);
-
+  ReactDOM.render(<Router routerConfig={opts.routerConfig} />, root)
 }
