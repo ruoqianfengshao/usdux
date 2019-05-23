@@ -16,7 +16,7 @@ fast build SPA application with MPA store, no redux but compat middlewares, the 
 
 ## Use
 
-``` shell
+```shell
 npm i usdux -S
 ```
 
@@ -89,9 +89,32 @@ export default const Component = () => {
 }
 ```
 
-### Default Action
+### Store Action
 
-* `setGlobal`
-* `resetGlobal`
-* `setPage`
-* `resetPage`
+* `setGlobal` set global state
+
+```js
+dispatch({type: 'setGlobal', payload: 'xxx'})
+```
+
+* `resetGlobal` reset global state
+
+```js
+dispatch({type: 'resetGlobal'})
+```
+
+* `setPage`  set page state
+
+```js
+dispatch({type: 'setGlobal', payload: 'xxx'})
+```
+
+* `resetPage` reset page state
+
+```js
+dispatch({type: 'resetPage'})
+```
+
+### middlewares
+
+In theory, compat redux-chunk middewares :）
