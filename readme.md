@@ -24,16 +24,22 @@ npm i usdux -S
 
 ### build
 
-usdux depends environment **process.env.usduxDir**, you should config with `webpack definePlugin`
+usdux depends on environment **process.env.usdux_dir_\***, you should config with `webpack.DefinePlugin`
 
 ```js
 new webpack.DefinePlugin({
-  usduxDir: {
-    component: JSON.stringify('path/to/component'),
-    layout: JSON.stringify('path/to/layout'),
-    execption: JSON.stringify('path/to/execption'),
-  }
+  usdux_dir_component: 'path/to/component',
+  usdux_dir_execption: 'path/to/execption',
+  usdux_dir_layout: 'path/to/layout',
 }),
+```
+
+And you should config webpack `resolve.modules` to specify component import order:
+
+```js
+resolve: {
+  modules: ['src', 'node_modules'],
+}
 ```
 
 ### start
@@ -51,11 +57,11 @@ App({
       layout: (props) => <div {...props}/>,
       title: 'example 1',
       routers: [{
-        title: 'asd',
-        component: 'home',
-        path: '/1'
+        title: 'home',
+        component: 'home', // component filename under usdux_dir_component
+        path: '/1' // will transfer to /center/1
       },{
-        title: '123',
+        title: 'other page',
         component: () => <div>dog</div>,
         path: '/2'
       }]

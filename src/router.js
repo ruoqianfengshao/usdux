@@ -85,7 +85,7 @@ export default (props) => {
   } = routerConfig
   const { setDynamicRouters } = useState([])
   const NoMatch = pageError.noMatch || defaultNoMatch
-  const ErrorWrap = (typeof erroWrap === 'string' ? loadable(() => import(`${process.env.usduxDir.execption}/${erroWrap}`)) : erroWrap) || ErrorBoundary
+  const ErrorWrap = (typeof erroWrap === 'string' ? loadable(() => import(`${process.env.usdux_dir_execption}/${erroWrap}`)) : erroWrap) || ErrorBoundary
 
   useEffect(() => {
     if (getDynamicRouters instanceof Function) {
@@ -101,20 +101,20 @@ export default (props) => {
             {
               staticRouters.map((frame, i) => {
                 const framePageError = frame.pageError || {}
-                const Layout = typeof frame.layout === 'string' ? loadable(() => import(`${process.env.usduxDir.layout}/${frame.layout}`)) : frame.layout
+                const Layout = typeof frame.layout === 'string' ? loadable(() => import(`${process.env.usdux_dir_layout}/${frame.layout}`)) : frame.layout
                 const NoMatchComponent = typeof framePageError.noMatch === 'string' ? loadable(() => import(`./${framePageError.noMatch}`)) : framePageError.noMatch
                 return (
-                  <Route path={frame.prefix}>
+                  <Route path={frame.prefix} key={frame.prefix}>
                     <Layout key={`static-router-${frame.title || 'router'}-${i}`}>
                       <ErrorWrap>
                         <Switch>
                           {
                             frame.routers.map((r) => {
-                              const component = typeof r.component === 'string' ? loadable(() => import(`${process.env.usduxDir.component}/${r.component}`)) : r.component
+                              const component = typeof r.component === 'string' ? loadable(() => import(`${process.env.usdux_dir_component}/${r.component}`)) : r.component
                               return (
                                 <Route
                                   exact
-                                  key={r.title}
+                                  key={r.path}
                                   component={component}
                                   path={r.path instanceof Array ? r.path.map(p => pathResolve(p, frame.prefix)) : pathResolve(r.path, frame.prefix)}
                                 />
