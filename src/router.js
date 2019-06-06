@@ -160,7 +160,7 @@ const router = (props) => {
                   <LoginLayout
                     key={frame.prefix}
                     path={frame.prefix}
-                    loginUrl={loginUrl}
+                    loginUrl={frame.loginUrl || loginUrl}
                     checkLogin={checkLogin}
                     frame={frame}
                     component={() => (

@@ -126,29 +126,34 @@ In theory, compat redux-chunk middewares :）
 {
   checkLogin: 'function',
   checkAuth: 'function',
-  getDynamicRouters: 'function',
-  pageError: {
-    fallback: 'ReactNode || stirng',
-    noMatch: 'ReactNode || string',
-    noAuth: 'ReactNode || string',
-  },
-  staticRouters: [{
-    layout: 'ReactNode || string',
-    prefix: 'string',
-    title: 'string',
-    needLogin: 'boolean',
+  routerConfig: {
+    loginUrl: 'string',
+    getDynamicRouters: 'function',
     pageError: {
       fallback: 'ReactNode || stirng',
       noMatch: 'ReactNode || string',
       noAuth: 'ReactNode || string',
     },
-    routers: [{
+    staticRouters: [{
+      layout: 'ReactNode || string',
+      loginUrl: 'string',
+      prefix: 'string',
       title: 'string',
-      authKey: 'string',
-      path: 'string || array',
-      needAuth: 'boolean',
-      component: 'ReactNode || string',
-    }],
-  }]
+      needLogin: 'boolean',
+      pageError: {
+        fallback: 'ReactNode || stirng',
+        noMatch: 'ReactNode || string',
+        noAuth: 'ReactNode || string',
+      },
+      routers: [{
+        title: 'string',
+        authKey: 'string',
+        path: 'string || array',
+        needAuth: 'boolean',
+        component: 'ReactNode || string',
+      }],
+    }]
+  }
+
 }
 ```
