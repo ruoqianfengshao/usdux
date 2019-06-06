@@ -9,7 +9,7 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch (error, info) {
     this.setState({ hasError: true })
-    console.log(info.componentStack)
+    console.error(`Page Error: ${info.componentStack}`)
   }
 
   render () {
@@ -17,7 +17,7 @@ export default class ErrorBoundary extends React.Component {
     const { children } = this.props
     if (hasError) {
       // You can render any custom fallback UI
-      return <h1>Something went wrong.</h1>
+      return <h1>The page has something wrong!</h1>
     }
 
     return children

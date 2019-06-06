@@ -1,6 +1,9 @@
 # usdux
 
-fast build SPA application with MPA store, no redux but compat middlewares, the global store apply with React.createContext
+<img src="./icon.png">
+
+A **frontend business framework**，build-in common develop feature for fast build application,
+Build SPA application with MPA store, no redux but compat middlewares, the global store apply with React.createContext
 
 - ✅ Build-in page and global store
 - ✅ Hocs and hooks to access store
@@ -9,7 +12,7 @@ fast build SPA application with MPA store, no redux but compat middlewares, the 
 - ✅ Integration react-router and allow jsonify router config
 - ✅ Build-in error-boundary and allow customize
 - ✅ Build-in routerError page and allow customize
-- [todo] Build-in auth page logic
+- ✅ Build-in auth page logic
 - [todo] Build-in key title description with router
 - [todo] support React suspence and lazy import
 - [todo] support ssr
@@ -22,58 +25,30 @@ npm i usdux -S
 
 ## Usage
 
-### build
-
-usdux depends on environment **process.env.usdux_dir_\***, you should config with `webpack.DefinePlugin`
-
-```js
-new webpack.DefinePlugin({
-  usdux_dir_component: 'path/to/component',
-  usdux_dir_execption: 'path/to/execption',
-  usdux_dir_layout: 'path/to/layout',
-}),
-```
-
-And you should config webpack `resolve.modules` to specify component import order:
-
-```js
-resolve: {
-  modules: ['src', 'node_modules'],
-}
-```
-
-### start
+### quick start
 
 write following code in `index.js` which starts application
 
 ```js
 import App from 'usdux'
-import logger from 'redux-logger'
 
 App({
   routerConfig: {
     staticRouters: [{
       prefix: '/center',
-      layout: (props) => <div {...props}/>,
+      layout: (props) => props.children,
       title: 'example 1',
       routers: [{
         title: 'home',
-        component: 'home', // component filename under usdux_dir_component
-        path: '/1' // will transfer to /center/1
-      },{
-        title: 'other page',
-        component: () => <div>dog</div>,
-        path: '/2'
+        component: () => <div>hello world!</div>,
+        path: '/1'
       }]
     }]
   },
-  middlewares: [
-    logger
-  ]
 })
 ```
 
-### Class Component
+#### Class Component
 
 ``` js
 import React from 'react'
@@ -93,7 +68,7 @@ export default @connect class Component extends React.Component {
 }
 ```
 
-### Functional Component
+#### Functional Component
 
 ```js
 
@@ -142,3 +117,36 @@ dispatch({type: 'resetPage'})
 ### middlewares
 
 In theory, compat redux-chunk middewares :）
+
+### Options
+
+``` js
+{
+  checkLogin: 'function',
+  checkAuth: 'function',
+  getDynamicRouters: 'function',
+  pageError: {
+    fallback: 'ReactNode || stirng',
+    noMatch: 'ReactNode || string',
+    noAuth: 'ReactNode || string',
+  },
+  staticRouters: [{
+    layout: 'ReactNode || string',
+    prefix: 'string',
+    title: 'string',
+    needLogin: 'boolean',
+    pageError: {
+      fallback: 'ReactNode || stirng',
+      noMatch: 'ReactNode || string',
+      noAuth: 'ReactNode || string',
+    },
+    routers: [{
+      title: 'string',
+      authKey: 'string',
+      path: 'string || array',
+      needAuth: 'boolean',
+      component: 'ReactNode || string',
+    }],
+  }]
+}
+```

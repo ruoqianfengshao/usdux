@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import {
-  BrowserRouter, Route, Switch,
+  BrowserRouter, Route, Switch, Redirect,
 } from 'react-router-dom'
-import loadable from '@loadable/component'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from './error-boundary'
 import { useStore, PageProvider } from './store'
 import defaultNoMatch from './page-error/no-match'
-// import DefaultNoAuth from './page-error/no-auth'
+import defaultNoAuth from './page-error/no-auth'
 
 export const PageRouter = (props) => {
   const [path, setPath] = useState('')
@@ -29,8 +28,9 @@ export const PageRouter = (props) => {
 /**
  *  routerConfig 数据结构
  *  {
+ *    checkLogin: function,
+ *    checkAuth: function,
  *    getDynamicRouters: function,
- *    ErrorBoundary: ReactNode || stirng,
  *    pageError: {
  *      noMatch: ReactNode || string,
  *      noAuth: ReactNode || string,
@@ -40,14 +40,15 @@ export const PageRouter = (props) => {
  *      layout: ReactNode || string,
  *      prefix: string,
  *      title: string,
- *      needAuth: boolean,
+ *      needLogin: boolean,
  *      pageError: {
+ *        fallback: ReactNode || stirng,
  *        noMatch: ReactNode || string,
  *        noAuth: ReactNode || string,
- *        noLogin:  ReactNode || string,
  *      },
  *      routers: [{
  *        title: string,
+ *        authKey: string,
  *        path: string || array,
  *        needAuth: boolean,
  *        component: ReactNode || string,
@@ -77,21 +78,72 @@ const pathResolve = (path, prefix) => {
   return prefix + path
 }
 
-export default (props) => {
-  const history = createBrowserHistory()
-  const { routerConfig } = props
-  const {
-    getDynamicRouters, staticRouters, erroWrap, pageError = {}, routerUpdateInterval = 15 * 60 * 1000,
-  } = routerConfig
-  const { setDynamicRouters } = useState([])
-  const NoMatch = pageError.noMatch || defaultNoMatch
-  const ErrorWrap = (typeof erroWrap === 'string' ? loadable(() => import(`${process.env.usdux_dir_execption}/${erroWrap}`)) : erroWrap) || ErrorBoundary
+const LoginLayout = ({
+  component: Component, checkLogin, loginUrl, frame, needLogin, ...restProps
+}) => {
+  const [state] = useStore()
 
-  useEffect(() => {
-    if (getDynamicRouters instanceof Function) {
-      setInterval(getDynamicRouters(props).then(data => setDynamicRouters(data)), routerUpdateInterval)
-    }
-  })
+  return (
+    <Route
+      {...restProps}
+      render={props => (
+        (needLogin === true && checkLogin(state)) || !needLogin
+          ? <Component {...props} />
+          : (
+            <Redirect to={{
+              pathname: loginUrl,
+              state: { from: props.location },
+            }}
+            />
+          )
+      )}
+    />
+  )
+}
+
+const AuthRoute = ({
+  component: Component, checkAuth, route, framePageError, ...restProps
+}) => {
+  const [state] = useStore()
+  const NoAuth = route.noAuth || framePageError.noAuth || defaultNoAuth
+
+  return (
+    <Route
+      {...restProps}
+      render={(props) => {
+        return (
+          (route.needAuth && checkAuth(state, route)) || !route.needAuth
+            ? <Component {...props} />
+            : <NoAuth {...props} />
+        )
+      }}
+    />
+  )
+}
+
+const router = (props) => {
+  const history = createBrowserHistory()
+  const {
+    routerConfig,
+    checkLogin,
+    checkAuth,
+  } = props
+  const {
+    // getDynamicRouters,
+    staticRouters,
+    loginUrl,
+    pageError = {},
+    // routerUpdateInterval = 15 * 60 * 1000,
+  } = routerConfig
+  // const { dynamicRouters, setDynamicRouters } = useState([])
+  const NoMatch = pageError.noMatch || defaultNoMatch
+  const ErrorFallback = pageError.fallback || ErrorBoundary
+
+  // useEffect(() => {
+  //   if (getDynamicRouters instanceof Function) {
+  //     setInterval(getDynamicRouters(props).then(data => setDynamicRouters(data)), routerUpdateInterval)
+  //   }
+  // })
 
   return (
     <BrowserRouter>
@@ -101,40 +153,54 @@ export default (props) => {
             {
               staticRouters.map((frame, i) => {
                 const framePageError = frame.pageError || {}
-                const Layout = typeof frame.layout === 'string' ? loadable(() => import(`${process.env.usdux_dir_layout}/${frame.layout}`)) : frame.layout
-                const NoMatchComponent = typeof framePageError.noMatch === 'string' ? loadable(() => import(`./${framePageError.noMatch}`)) : framePageError.noMatch
+                const ErrorPage = framePageError.fallback || ErrorFallback
+                const Layout = frame.layout || React.Fragment
+
                 return (
-                  <Route path={frame.prefix} key={frame.prefix}>
-                    <Layout key={`static-router-${frame.title || 'router'}-${i}`}>
-                      <ErrorWrap>
-                        <Switch>
-                          {
-                            frame.routers.map((r) => {
-                              const component = typeof r.component === 'string' ? loadable(() => import(`${process.env.usdux_dir_component}/${r.component}`)) : r.component
-                              return (
-                                <Route
-                                  exact
-                                  key={r.path}
-                                  component={component}
-                                  path={r.path instanceof Array ? r.path.map(p => pathResolve(p, frame.prefix)) : pathResolve(r.path, frame.prefix)}
-                                />
-                              )
-                            })
-                          }
-                          {
-                            <Route path={frame.prefix} component={NoMatchComponent || NoMatch} />
-                          }
-                        </Switch>
-                      </ErrorWrap>
-                    </Layout>
-                  </Route>
+                  <LoginLayout
+                    key={frame.prefix}
+                    path={frame.prefix}
+                    loginUrl={loginUrl}
+                    checkLogin={checkLogin}
+                    frame={frame}
+                    component={() => (
+                      <Layout key={`static-router-${frame.title || 'router'}-${i}`}>
+                        <ErrorPage>
+                          <Switch>
+                            {
+                              frame.routers.map((r) => {
+                                const path = r.path instanceof Array ? r.path.map(p => pathResolve(p, frame.prefix)) : pathResolve(r.path, frame.prefix)
+
+                                return (
+                                  <AuthRoute
+                                    exact
+                                    checkAuth={checkAuth}
+                                    framePageError={framePageError}
+                                    key={path}
+                                    route={r}
+                                    path={path}
+                                    component={r.component}
+                                  />
+                                )
+                              })
+                            }
+                            {
+                              <Route key={`${frame.prefix}-no-match`} path={frame.prefix} component={framePageError.noMatch || NoMatch} />
+                            }
+                          </Switch>
+                        </ErrorPage>
+                      </Layout>
+                    )}
+                  />
                 )
               })
             }
-            <Route component={NoMatch} />
+            <Route component={NoMatch} key="global-no-match" />
           </Switch>
         </PageRouter>
       </PageProvider>
     </BrowserRouter>
   )
 }
+
+export default router

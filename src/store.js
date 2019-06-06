@@ -1,11 +1,16 @@
 import React, { useContext } from 'react'
 import useEnhancedReducer from './enhanced-reducer'
 
+// Default Store state with base structure
 const initialStore = {
-  _global_: {},
+  _global_: {
+    _user_: {},
+    _auth_: {},
+  },
   _page_: {},
 }
 
+// Dtore object with method and data
 const store = {
   useMiddleware (middlewares) {
     this.middlewares = [...this.middlewares, ...[].concat(middlewares)]
@@ -17,10 +22,11 @@ const store = {
   middlewares: [],
 }
 
+// Global context
 const StoreContext = React.createContext(store.initialState)
 
-// default store reducer for operation global and page
-export const reducer = (state, action) => {
+// Default store reducer for operation global and page
+const reducer = (state, action) => {
   switch (action.type) {
     case 'setGlobal':
       return { ...state, _global_: { ...state._global_, ...action.payload } }
@@ -38,15 +44,12 @@ export const reducer = (state, action) => {
   }
 }
 
+// Hooks to access context
 export const useStore = () => {
   return useEnhancedReducer(reducer, useContext(StoreContext), store.middlewares)
 }
 
-export const PageProvider = ({ children }) => {
-  const [context, dispatch] = useStore()
-  return <StoreContext.Provider value={{ ...context, dispatch }}>{children}</StoreContext.Provider>
-}
-
+// Hoc to access context
 export const connect = (WrappedComponent) => {
   return class ConnectClass extends React.Component {
     render () {
@@ -59,6 +62,12 @@ export const connect = (WrappedComponent) => {
       )
     }
   }
+}
+
+// Global Context Provider
+export const PageProvider = ({ children }) => {
+  const [context, dispatch] = useStore()
+  return <StoreContext.Provider value={{ ...context, dispatch }}>{children}</StoreContext.Provider>
 }
 
 export default store
