@@ -1,7 +1,7 @@
 # Usdux
 
-<div style="text-align: center;">
-  <img src="./icon.png" width="50%">
+<div style="text-align: center; margin: 20px;">
+  <img src="./icon.png" width="30%">
 </div>
 
 A **frontend business framework**，build-in common develop feature for fast build application,
