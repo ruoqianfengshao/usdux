@@ -1,6 +1,8 @@
-# usdux
+# Usdux
 
-<img src="./icon.png">
+<div style="text-align: center;">
+  <img src="./icon.png" width="50%">
+</div>
 
 A **frontend business framework**，build-in common develop feature for fast build application,
 Build SPA application with MPA store, no redux but compat middlewares, the global store apply with React.createContext
