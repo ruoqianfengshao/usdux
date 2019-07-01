@@ -6,6 +6,7 @@ node_modules
 # production
 /dist
 /public
+example/ssr/dist/
 
 # misc
 .DS_Store
