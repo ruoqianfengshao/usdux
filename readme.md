@@ -15,9 +15,9 @@ Build SPA application with MPA store, no redux but compat middlewares, the globa
 - ✅ Build-in error-boundary and allow customize
 - ✅ Build-in routerError page and allow customize
 - ✅ Build-in auth page logic
+- ✅ support simple ssr, one router only allow one component with async request
 - [todo] Build-in key title description with router
-- [todo] support React suspence and lazy import
-- [todo] support ssr
+- [todo] support React suspence and lazy import in server
 
 ## Install
 
@@ -116,7 +116,7 @@ dispatch({type: 'setGlobal', payload: 'xxx'})
 dispatch({type: 'resetPage'})
 ```
 
-### middlewares
+### Dispatch middlewares
 
 In theory, compat redux-chunk middewares :）
 

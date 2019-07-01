@@ -3,7 +3,7 @@ import {
   BrowserRouter, Route, Switch, Redirect,
 } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
-import ErrorBoundary from './error-boundary'
+import defaultErrorBoundary from './error-boundary'
 import { useStore, PageProvider } from './store'
 import defaultNoMatch from './page-error/no-match'
 import defaultNoAuth from './page-error/no-auth'
@@ -20,7 +20,7 @@ export const PageRouter = (props) => {
         dispatch({ type: 'resetPage' })
       }
     })
-  })
+  }, [])
 
   return props.children
 }
@@ -58,7 +58,12 @@ export const PageRouter = (props) => {
  *
  */
 
-const pathResolve = (path, prefix) => {
+
+export const pathResolve = (path, prefix = '/') => {
+  if (path.indexOf(prefix) === 0) {
+    return path
+  }
+
   if (prefix.indexOf('/') === prefix.length - 1) {
     throw new Error(
       `staticRouters' prefix: '${prefix}' can't be ended with '/', please delete '/'`
@@ -71,14 +76,26 @@ const pathResolve = (path, prefix) => {
     )
   }
 
-  if (path.indexOf(prefix) === 0) {
-    return path
-  }
-
   return prefix + path
 }
 
-const LoginLayout = ({
+export const flatRouter = (routerConfig) => {
+  const { staticRouters } = routerConfig
+  const arr = []
+  staticRouters.forEach((i) => {
+    const { prefix } = i
+    i.routers.forEach((r) => {
+      arr.push({
+        path: pathResolve(r.path, prefix),
+        component: r.component,
+      })
+    })
+  })
+
+  return arr
+}
+
+export const LoginLayout = ({
   component: Component, checkLogin, loginUrl, frame, needLogin, ...restProps
 }) => {
   const [state] = useStore()
@@ -86,33 +103,43 @@ const LoginLayout = ({
   return (
     <Route
       {...restProps}
-      render={props => (
-        (needLogin === true && checkLogin(state)) || !needLogin
-          ? <Component {...props} />
-          : (
-            <Redirect to={{
+      render={(props) => {
+        if ((needLogin === true && checkLogin(state)) || !needLogin) {
+          return (<Component {...props} />)
+        }
+
+        const { staticContext } = props
+        if (staticContext) {
+          Object.assign(staticContext, { status: 401 })
+        }
+
+        return (
+          <Redirect
+            from={props.location.pathname}
+            to={{
               pathname: loginUrl,
               state: { from: props.location },
             }}
-            />
-          )
-      )}
+          />
+        )
+      }}
     />
   )
 }
 
-const AuthRoute = ({
-  component: Component, checkAuth, route, framePageError, ...restProps
+export const AuthRoute = ({
+  component: Component, checkAuth, route, pageError, needAuth, ...restProps
 }) => {
   const [state] = useStore()
-  const NoAuth = route.noAuth || framePageError.noAuth || defaultNoAuth
+  const NoAuth = route.noAuth || pageError.noAuth || defaultNoAuth
+  const routeAuth = route.needAuth === undefined ? needAuth : route.needAuth
 
   return (
     <Route
       {...restProps}
       render={(props) => {
         return (
-          (route.needAuth && checkAuth(state, route)) || !route.needAuth
+          (routeAuth && checkAuth(state, route)) || !routeAuth
             ? <Component {...props} />
             : <NoAuth {...props} />
         )
@@ -137,7 +164,7 @@ const router = (props) => {
   } = routerConfig
   // const { dynamicRouters, setDynamicRouters } = useState([])
   const NoMatch = pageError.noMatch || defaultNoMatch
-  const ErrorFallback = pageError.fallback || ErrorBoundary
+  const ErrorFallback = pageError.fallback || defaultErrorBoundary
 
   // useEffect(() => {
   //   if (getDynamicRouters instanceof Function) {
@@ -146,8 +173,8 @@ const router = (props) => {
   // })
 
   return (
-    <BrowserRouter>
-      <PageProvider>
+    <PageProvider createStore={useStore}>
+      <BrowserRouter>
         <PageRouter history={history}>
           <Switch>
             {
@@ -155,29 +182,34 @@ const router = (props) => {
                 const framePageError = frame.pageError || {}
                 const ErrorPage = framePageError.fallback || ErrorFallback
                 const Layout = frame.layout || React.Fragment
+                const {
+                  prefix = '/', title = 'layout', routers = [], needAuth = false, needLogin = false,
+                } = frame
 
                 return (
                   <LoginLayout
-                    key={frame.prefix}
-                    path={frame.prefix}
-                    loginUrl={frame.loginUrl || loginUrl}
+                    key={`layout-${i}`}
+                    path={prefix || '/'}
+                    loginUrl={frame.loginUrl || loginUrl || '/login'}
                     checkLogin={checkLogin}
+                    needLogin={needLogin}
                     frame={frame}
                     component={() => (
-                      <Layout key={`static-router-${frame.title || 'router'}-${i}`}>
+                      <Layout key={`static-router-${title}-${i}`}>
                         <ErrorPage>
                           <Switch>
                             {
-                              frame.routers.map((r) => {
-                                const path = r.path instanceof Array ? r.path.map(p => pathResolve(p, frame.prefix)) : pathResolve(r.path, frame.prefix)
+                              routers.map((r) => {
+                                const path = r.path instanceof Array ? r.path.map(p => pathResolve(p, prefix)) : pathResolve(r.path, prefix)
 
                                 return (
                                   <AuthRoute
                                     exact
                                     checkAuth={checkAuth}
-                                    framePageError={framePageError}
+                                    pageError={framePageError}
                                     key={path}
                                     route={r}
+                                    needAuth={needAuth}
                                     path={path}
                                     component={r.component}
                                   />
@@ -198,8 +230,8 @@ const router = (props) => {
             <Route component={NoMatch} key="global-no-match" />
           </Switch>
         </PageRouter>
-      </PageProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </PageProvider>
   )
 }
 

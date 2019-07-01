@@ -20,10 +20,9 @@ const store = {
   },
   initialState: initialStore,
   middlewares: [],
+  initContext () { this.context = React.createContext(this.initialState) },
+  context: React.createContext(),
 }
-
-// Global context
-const StoreContext = React.createContext(store.initialState)
 
 // Default store reducer for operation global and page
 const reducer = (state, action) => {
@@ -46,19 +45,20 @@ const reducer = (state, action) => {
 
 // Hooks to access context
 export const useStore = () => {
-  return useEnhancedReducer(reducer, useContext(StoreContext), store.middlewares)
+  return useEnhancedReducer(reducer, useContext(store.context), store.middlewares)
 }
 
 // Hoc to access context
 export const connect = (WrappedComponent) => {
   return class ConnectClass extends React.Component {
     render () {
+      const StoreConsumer = store.context.Consumer
       return (
-        <StoreContext.Consumer>
+        <StoreConsumer>
           {
             state => <WrappedComponent {...state} {...this.props} />
           }
-        </StoreContext.Consumer>
+        </StoreConsumer>
       )
     }
   }
@@ -66,8 +66,10 @@ export const connect = (WrappedComponent) => {
 
 // Global Context Provider
 export const PageProvider = ({ children }) => {
-  const [context, dispatch] = useStore()
-  return <StoreContext.Provider value={{ ...context, dispatch }}>{children}</StoreContext.Provider>
+  const StoreProvider = store.context.Provider
+  const [state, dispatch] = useStore()
+
+  return <StoreProvider value={{ ...state, dispatch }}>{children}</StoreProvider>
 }
 
 export default store
